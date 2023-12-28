@@ -1,12 +1,28 @@
-import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { SortableContext, arrayMove, rectSortingStrategy, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import "./App.css";
 import { DndContext, DragEndEvent, DragStartEvent, KeyboardSensor, PointerSensor, TouchSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
 import { useState } from "react";
 import { ImageGallery } from "./types/global.types";
 import { initialImageData } from "./data";
+import ImageCard from "./components/Cards/ImageCard";
 
 function App() {
   const [galleryData, setGalleryData] = useState(initialImageData)
+  const handleSelectImage = (id: string | number) => {
+    // if galleryData.isSelected === true then set to false and vice versa
+    const newGalleryData = galleryData.map((imageItem) => {
+      if (imageItem.id === id) {
+        return {
+          ...imageItem,
+          isSelected: !imageItem.isSelected,
+        };
+      }
+
+      return imageItem;
+    });
+
+    setGalleryData(newGalleryData);
+  };
   // dnd code start here
 
   const [activeItem, setActiveItem] = useState<ImageGallery | null>(null)
@@ -54,7 +70,24 @@ function App() {
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
           >
-            <div>Image gallery</div>
+            <div className="grid grid-cols-2 gap-8 p-8 md:grid-cols-5">
+            <SortableContext
+                items={galleryData}
+                strategy={rectSortingStrategy}
+              >
+                {galleryData.map((imageItem) => {
+                  return (
+                    <ImageCard
+                      key={imageItem.id}
+                      id={imageItem.id}
+                      isSelected={imageItem.isSelected}
+                      slug={imageItem.slug}
+                      onClick={handleSelectImage}
+                    />
+                  );
+                })}
+              </SortableContext>
+            </div>
           </DndContext>
         </div>
       </div>
